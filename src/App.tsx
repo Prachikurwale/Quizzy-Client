@@ -78,7 +78,9 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     async function initQuizzy() {
       try {
         sharedAudioPlayer.configure({ autoPlay: true });
-        ttsRef.current = new TTSLogic({ voiceId:"/models/voice.onnx" });
+        ttsRef.current = new TTSLogic({
+           voiceId: window.location.origin + "/models/voice.onnx"
+          });
         await ttsRef.current.initialize();
         
         sttRef.current = new STTLogic(
@@ -92,6 +94,7 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
         setIsReady(true);
         setStatus("Ready! Click to start.");
       } catch (err) { 
+        console.error("Voice Init Error:", err);
         setStatus("Error loading voice: " + err); 
       }
     }
