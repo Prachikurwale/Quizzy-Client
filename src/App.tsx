@@ -6,12 +6,20 @@ import Onboarding from "./Onboarding";
 import { FaSignOutAlt, FaRegComments, FaTrashAlt, FaPaperPlane ,FaCamera } from 'react-icons/fa';
  
 
-const client = new OpenAI({
-  baseURL: `${window.location.origin}/api/nvidia`,
+// const client = new OpenAI({
+//   baseURL: `${window.location.origin}/api/nvidia`,
   
+//   apiKey: import.meta.env.VITE_NVIDIA_KEY,
+//   dangerouslyAllowBrowser: true,
+// });
+
+const client = new OpenAI({
+  baseURL: "https://quizzy-server-i4zf.onrender.com/api/nvidia", // seedha render ka link
   apiKey: import.meta.env.VITE_NVIDIA_KEY,
   dangerouslyAllowBrowser: true,
 });
+
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
