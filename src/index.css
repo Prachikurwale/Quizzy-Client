@@ -108,7 +108,8 @@ button:focus-visible {
 
 @font-face {
   font-family: 'Samarkan';
-  src: url('/fonts/Samarkan.ttf') format('truetype');
+   
+  src: url('/fonts/samarkan/samarkan.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
