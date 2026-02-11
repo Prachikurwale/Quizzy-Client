@@ -78,7 +78,7 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     async function initQuizzy() {
       try {
         sharedAudioPlayer.configure({ autoPlay: true });
-        ttsRef.current = new TTSLogic({ voiceId: "en_US-hfc_female-medium" });
+        ttsRef.current = new TTSLogic({ voiceId:"/models/voice.onnx" });
         await ttsRef.current.initialize();
         
         sttRef.current = new STTLogic(
