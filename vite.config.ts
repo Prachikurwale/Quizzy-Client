@@ -9,7 +9,7 @@ export default defineConfig({
      
       '/api/nvidia': {
         target: 'https://integrate.api.nvidia.com/v1',
-        changeOrigin: false,
+        changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/nvidia/, ''),
       },
     },
