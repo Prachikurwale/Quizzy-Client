@@ -5,7 +5,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: (data: any) 
   
   const handleSuccess = async (googleResponse: any) => {
     try {
-      const response = await fetch('http://localhost:5000/api/google-login', {
+      const response = await fetch('https://quizzy-server-i4zf.onrender.com/api/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: googleResponse.credential })

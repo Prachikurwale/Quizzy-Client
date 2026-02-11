@@ -22,7 +22,7 @@ const [showQuizzyIntro, setShowQuizzyIntro] = useState(false);
 const saveToDb = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/save-onboarding', {
+      const response = await fetch('https://quizzy-server-i4zf.onrender.com/api/save-onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
