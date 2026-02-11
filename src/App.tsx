@@ -4,7 +4,7 @@ import OpenAI from "openai";
 import Login from "./Login"; 
 import Onboarding from "./Onboarding"; 
 import { FaSignOutAlt, FaRegComments, FaTrashAlt, FaPaperPlane ,FaCamera } from 'react-icons/fa';
-import { Content } from "openai/resources/containers/files.mjs";
+ 
 
 const client = new OpenAI({
   baseURL: `${window.location.origin}/api/nvidia`,

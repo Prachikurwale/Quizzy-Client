@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STTLogic, TTSLogic, sharedAudioPlayer } from 'speech-to-speech';
 
 type Latencies = {
