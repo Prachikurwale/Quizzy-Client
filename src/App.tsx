@@ -7,7 +7,7 @@ import { FaSignOutAlt, FaRegComments, FaTrashAlt, FaPaperPlane ,FaCamera } from 
  
 
 const client = new OpenAI({
-  baseURL: `${window.location.origin}/api/nvidia`,
+  baseURL: `https://quizzy-server-i4zf.onrender.com/api/nvidia`,
   
   apiKey: import.meta.env.VITE_NVIDIA_KEY,
   dangerouslyAllowBrowser: true,
