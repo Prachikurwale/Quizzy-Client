@@ -136,7 +136,16 @@ if (response.ok) {
           </div>
           <input placeholder="Child's Name" required style={inputStyle} onChange={e => setFormData({...formData, childName: e.target.value})} />
           <div style={rowStyle}>
-            <input type="date" placeholder="DOB" required style={inputStyle} onChange={e => setFormData({...formData, dob: e.target.value})} />
+          <input 
+  type={formData.dob ? "date" : "text"}  
+  placeholder="Child's Date of Birth" 
+  required 
+  style={inputStyle} 
+  onFocus={(e) => (e.target.type = "date")} 
+  onBlur={(e) => !formData.dob && (e.target.type = "text")}  
+  onChange={e => setFormData({...formData, dob: e.target.value})} 
+  value={formData.dob}
+/>
             <select style={inputStyle} onChange={e => setFormData({...formData, gender: e.target.value})}>
               <option value="">Gender</option>
               <option value="male">Male</option>

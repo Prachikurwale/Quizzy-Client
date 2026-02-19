@@ -6,20 +6,12 @@ import Onboarding from "./Onboarding";
 import { FaSignOutAlt, FaRegComments, FaTrashAlt, FaPaperPlane ,FaCamera } from 'react-icons/fa';
  
 
-// const client = new OpenAI({
-//   baseURL: `${window.location.origin}/api/nvidia`,
-  
-//   apiKey: import.meta.env.VITE_NVIDIA_KEY,
-//   dangerouslyAllowBrowser: true,
-// });
-
 const client = new OpenAI({
-  baseURL: "https://quizzy-server-i4zf.onrender.com/api/nvidia", // seedha render ka link
+  baseURL: `${window.location.origin}/api/nvidia`,
+  
   apiKey: import.meta.env.VITE_NVIDIA_KEY,
   dangerouslyAllowBrowser: true,
 });
-
-
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -78,9 +70,7 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     async function initQuizzy() {
       try {
         sharedAudioPlayer.configure({ autoPlay: true });
-        ttsRef.current = new TTSLogic({
-           voiceId: window.location.origin + "/models/voice.onnx"
-          });
+        ttsRef.current = new TTSLogic({ voiceId: "en_US-hfc_female-medium" });
         await ttsRef.current.initialize();
         
         sttRef.current = new STTLogic(
@@ -94,7 +84,6 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
         setIsReady(true);
         setStatus("Ready! Click to start.");
       } catch (err) { 
-        console.error("Voice Init Error:", err);
         setStatus("Error loading voice: " + err); 
       }
     }
@@ -255,7 +244,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
     const savedName = localStorage.getItem("quizzy_child_name");
 
     if (userData.isOnboarded || savedOnboarded === "false") {
-      setIsOnboarded(true);///////////
+      setIsOnboarded(true);/////////////
       setExplorerName(userData.childName || savedName || userData.username);
       localStorage.setItem("quizzy_onboarded", "true");
     } else {
@@ -312,7 +301,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
 
     
   <h2 style={{ 
-  color: 'black', 
+  color: 'white', 
   fontFamily: "'Samarkan', cursive", 
   fontSize: '2.5rem',             
   letterSpacing: '1px' ,
@@ -334,6 +323,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
          </div>
            <div style={styles.profileDetails}>
              <span style={styles.userName}>{explorerName  }</span>
+             
             <button onClick={handleLogout} style={styles.logoutLink}>
   <FaSignOutAlt style={{ marginRight: '5px' }} /> Logout
 </button>
@@ -365,41 +355,19 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
     </div>
   )}
 
-  {/* <div style={styles.avatarContainer}>
-   {status === "Speaking..." ? (
-      <video
-        src="/Quizzy.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        style={styles.avatarMedia}
-      />
-    ) : (
-      <img
-        src="/cute.jpg"
-        style={{
-          ...styles.avatarMedia,
-          animation: (status === "Thinking..." || status === "Listening...") ? "pulse 1.8s infinite" : "none"
-        }}
-        alt="Quizzy"
-      />
-    )}
-  </div> */}
-
-
+   
   <div style={{
   ...styles.avatarContainer,
-  // 📍 Add animation when active
+ 
   animation: (status === "Listening..." || status === "Speaking...") 
     ? "gentleFade 0.5s ease-out, glowPulse 2s infinite ease-in-out" 
     : "none",
-  // Change border color to match the activity
+  
   borderColor: status === "Listening..." ? "#FF4500" : "#63918b"
 }}>
   {status === "Speaking..." ? (
     <video
-      src="/Quizzy.mp4"
+      src="/Quizzy_V.mp4"
       autoPlay
       loop
       muted
@@ -411,7 +379,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
       src="/cute.jpg"
       style={{
         ...styles.avatarMedia,
-        // Keep the subtle scale pulse
+      
         animation: (status === "Thinking..." || status === "Listening...") ? "pulse 1.5s infinite" : "none"
       }}
       alt="Quizzy"
@@ -545,19 +513,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "space-between", alignItems: "center", boxSizing: "border-box", zIndex: 10  ,position:"relative"
   },
   
-  // chatToggleBtn: {
-  //   background: "white",   color: "#FF4500", 
-  //   width: "100px", height: "100px",   display: "flex", 
-  //   alignItems: "center", justifyContent: "center", cursor: "pointer", 
-  //   boxShadow: "0 4px #e63e00", transition: "0.2s"
-  // },
+
  navTitle: { color: "black", fontSize: "1.8rem", margin: 0, fontWeight: "bold" },
  
   
-  // profileSection: { 
-  //   display: "flex",  background: "white", flexDirection: "column", alignItems: "flex-start",
-  //   padding: "4px 12px 4px 4px", borderRadius: "30px", border: "2px solid #FF4500" 
-  // },
+ 
   
   profilePopup: {
     position: "absolute",
@@ -598,19 +558,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   alignItems: "center"    
 },
  profileDetails: { display: "flex", flexDirection: "column", alignItems: "flex-start" },
-  // logoutIconBtn: { 
-  //   background: "#fff0eb", border: "2px solid #decac3", color: "#FF4500", 
-  //   width: "45px", height: "45px", borderRadius: "12px", display: "flex", 
-  //   alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "0.2s" 
-  // },
-  // header: { 
-  //   color: "#FF4500", fontSize: "2.8rem", textShadow: "3px 3px 0px white", 
-  //   margin: "10px 0", textAlign: "center" 
-  // },
+ 
  avatarContainer: {
    
-    width: "150px",      
-    height: "150px",
+    width: "180px",      
+    height: "180px",
     borderRadius: "50%", 
     overflow: "hidden",
     border: "2px solid #eee",
@@ -623,7 +575,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
  
   chatWindow: { 
-    position: "absolute", top: "90px", left: "20px", width: "320px", height: "60vh", 
+    position: "absolute", top: "90px", left: "20px", width: "320px", height: "70vh", 
     background: "white", borderRadius: "20px", display: "flex", flexDirection: "column", 
     boxShadow: "0 15px 40px rgba(0,0,0,0.2)", overflow: "hidden", zIndex: 20, border: "3px solid #63868b" 
   },
@@ -712,14 +664,14 @@ mainBtn: {
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Glowing Shadow Pulse */
+ 
   @keyframes glowPulse {
     0% { box-shadow: 0 0 5px rgba(255, 69, 0, 0.2); }
     50% { box-shadow: 0 0 25px rgba(255, 69, 0, 0.6); }
     100% { box-shadow: 0 0 5px rgba(255, 69, 0, 0.2); }
   }
 
-  /* Existing Pulse for the image scale */
+ 
   @keyframes pulse { 
     0% { transform: scale(1); } 
     50% { transform: scale(1.05); } 
