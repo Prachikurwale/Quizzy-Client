@@ -7,8 +7,8 @@ import { FaSignOutAlt, FaRegComments, FaTrashAlt, FaPaperPlane ,FaCamera } from 
  
 
 const client = new OpenAI({
-  baseURL: `https://quizzy-server-i4zf.onrender.com/api/nvidia`,
-  
+   //baseURL: "http://localhost:3000/api/nvidia",
+   baseURL: "https://quizzy-server-i4zf.onrender.com/api/nvidia",
   apiKey: import.meta.env.VITE_NVIDIA_KEY,
   dangerouslyAllowBrowser: true,
 });
@@ -21,7 +21,7 @@ export default function App() {
   const [status, setStatus] = useState("Loading...");
   const [isReady, setIsReady] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-
+const [isActuallySpeaking, setIsActuallySpeaking] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);  
 const toggleProfile = () => setIsProfileOpen(!isProfileOpen);  
 
@@ -51,8 +51,8 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     const savedChildName = localStorage.getItem("quizzy_child_name");
 
     if (token) {
-      setIsLoggedIn(false);  ///****//
-      if (savedOnboarded === "false") {
+      setIsLoggedIn(true);  ///****//
+      if (savedOnboarded === "true") {
         setIsOnboarded(true);
         setExplorerName(savedChildName || "");
       }
@@ -74,8 +74,17 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
         await ttsRef.current.initialize();
         
         sttRef.current = new STTLogic(
-          (msg) => console.log(msg),
+          (msg) => {
+            if (msg === "error: aborted") {
+               console.log("Mic aborted, waiting for cool down...");
+            }
+          },
+            
+           
+
+          
           async (transcript) => {
+            console.log("Captured Transcript:", transcript);
             if (transcript.trim().length > 1 && !isProcessing.current) {
               await talkToQuizzy(transcript);
             }
@@ -93,8 +102,7 @@ const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
 
 
-
-
+ 
 
 
 
@@ -135,6 +143,9 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
 
 
+ 
+
+
 
 const talkToQuizzy = async (input: string, imageUrl?: string) => {
   if (isProcessing.current) return;
@@ -143,7 +154,6 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
 
   setStatus("Thinking...");
 
-  
   const userContent = imageUrl 
     ? [
         { type: "text", text: input },
@@ -152,21 +162,18 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
     : input;
 
   const newUserMsg = { role: "user", content: userContent };
-  
- 
   const apiMessages = historyRef.current.map(msg => {
     if (Array.isArray(msg.content)) {
-      
       const textPart = msg.content.find((p: any) => p.type === "text");
       return { role: msg.role, content: textPart ? textPart.text : "" };
     }
     return msg;
   });
 
-   
   apiMessages.push(newUserMsg);
 
   try {
+    console.log("Sending request to AI...");
     const stream = await client.chat.completions.create({
       model: imageUrl ? "meta/llama-3.2-11b-vision-instruct" : "meta/llama-3.1-8b-instruct",
       messages: apiMessages,
@@ -179,7 +186,6 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
     setStatus("Speaking...");
 
     for await (const chunk of stream) {
-       
       const content = chunk.choices[0]?.delta?.content || "";
       if (!content) continue;
 
@@ -187,20 +193,27 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
       sentenceBuffer += content;
 
       if (/[.!?]/.test(sentenceBuffer)) {
-        const sentenceToSpeak = sentenceBuffer.trim();
+       
+        const cleanSentence = sentenceBuffer.replace(/[\*\#\_]/g, '').trim();
+        
         sentenceBuffer = ""; 
-        ttsRef.current.synthesize(sentenceToSpeak).then((result: any) => {
-          sharedAudioPlayer.addAudioIntoQueue(result.audio, result.sampleRate);
-        });
+        if (cleanSentence) {
+          ttsRef.current.synthesize(cleanSentence).then((result: any) => {
+            sharedAudioPlayer.addAudioIntoQueue(result.audio, result.sampleRate);
+          });
+        }
       }
     }
 
     if (sentenceBuffer.trim()) {
-       const result = await ttsRef.current.synthesize(sentenceBuffer.trim());
-       sharedAudioPlayer.addAudioIntoQueue(result.audio, result.sampleRate);
+    
+      const lastCleanSentence = sentenceBuffer.replace(/[\*\#\_]/g, '').trim();
+      if (lastCleanSentence) {
+        const result = await ttsRef.current.synthesize(lastCleanSentence);
+        sharedAudioPlayer.addAudioIntoQueue(result.audio, result.sampleRate);
+      }
     }
 
-    
     const newHistory = [...historyRef.current, newUserMsg, { role: "assistant", content: fullReply }];
     setChatHistory(newHistory);
     historyRef.current = newHistory;
@@ -213,14 +226,11 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
 
   } catch (err: any) {
     console.error("Streaming Error:", err);
-    
     isProcessing.current = false;
     setStatus("Ready! Click to start.");
     if (sttRef.current) sttRef.current.start();
   }
 };
-
-
 
 
 
@@ -243,7 +253,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
     const savedOnboarded = localStorage.getItem("quizzy_onboarded");
     const savedName = localStorage.getItem("quizzy_child_name");
 
-    if (userData.isOnboarded || savedOnboarded === "false") {
+    if (userData.isOnboarded || savedOnboarded === "true") {
       setIsOnboarded(true);/////////////
       setExplorerName(userData.childName || savedName || userData.username);
       localStorage.setItem("quizzy_onboarded", "true");
@@ -261,7 +271,7 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
   };
 
   const clearChat = () => {
-    const resetHistory = [{ role: "system", content: "You are Quizzy." }];
+    const resetHistory = [{ role: "system", content: "You are Quizzy, a friendly AI detective for kids. When you see an image, identify the object, animal, or toy. Tell the child its color and one fun fact about it. Keep your answers short, magical, and encouraging!" }];
     setChatHistory(resetHistory);
     localStorage.setItem("quizzy_history", JSON.stringify(resetHistory));
   };
@@ -358,14 +368,12 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
    
   <div style={{
   ...styles.avatarContainer,
- 
-  animation: (status === "Listening..." || status === "Speaking...") 
-    ? "gentleFade 0.5s ease-out, glowPulse 2s infinite ease-in-out" 
+  animation: (isActuallySpeaking || status === "Listening...") 
+    ? "glowPulse 2s infinite ease-in-out" 
     : "none",
-  
   borderColor: status === "Listening..." ? "#FF4500" : "#63918b"
 }}>
-  {status === "Speaking..." ? (
+  {isActuallySpeaking ? (  
     <video
       src="/Quizzy_V.mp4"
       autoPlay
@@ -379,7 +387,6 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
       src="/cute.jpg"
       style={{
         ...styles.avatarMedia,
-      
         animation: (status === "Thinking..." || status === "Listening...") ? "pulse 1.5s infinite" : "none"
       }}
       alt="Quizzy"
@@ -436,7 +443,12 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
               value={textInput} 
               onChange={(e) => setTextInput(e.target.value)}
               placeholder="Type here..."
-              onKeyDown={(e) => e.key === 'Enter' && talkToQuizzy(textInput)}
+              onKeyDown={(e) => {
+  if (e.key === "Enter") {
+    talkToQuizzy(textInput);
+    setTextInput("");
+  }
+}}
             />
       
   <FaPaperPlane size={26}   
@@ -449,12 +461,16 @@ const talkToQuizzy = async (input: string, imageUrl?: string) => {
 
       <div style={styles.footer}>
     <button
-      onClick={() => { sttRef.current.start(); setStatus("Listening..."); }}
+      onClick={ async() => {
+      await (sharedAudioPlayer as any).resume?.();
+      sttRef.current.start(); setStatus("Listening..."); }}
       disabled={!isReady || isProcessing.current}
       style={styles.talkBtn}
     >
       Start Talking
     </button>
+
+    
     
     <button
       onClick={stopConversation}
@@ -598,7 +614,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   chatInputRow: { padding: "12px", display: "flex", gap: "8px", borderTop: "2px solid #eee", alignItems: "center" },
   inputField: { 
-    flex: 1, padding: "10px 15px", borderRadius: "25px", border: "2px solid #eee", color :"white",
+    flex: 1, padding: "10px 15px", borderRadius: "25px", border: "2px solid #eee", color :"333",
     outline: "none", fontSize: "0.9rem" 
   },
  footer: { 
@@ -679,4 +695,3 @@ mainBtn: {
   }
 
 `}</style>
-
